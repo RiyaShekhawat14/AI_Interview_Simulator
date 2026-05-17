@@ -1,0 +1,30 @@
+services:
+  - type: web
+    name: ai-interview-backend
+    env: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    plan: free
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: ai-interview-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_MINUTES
+        value: 720
+      - key: SESSION_TTL_SECONDS
+        value: 7200
+      - key: ALLOWED_ORIGINS
+        value: https://your-frontend-domain.vercel.app
+      - key: LLAMA_MODEL
+        value: mistral:latest
+      - key: LLAMA_FALLBACK_MODEL
+        value: llama3:8b
+      - key: LLAMA_TIMEOUT_SECONDS
+        value: 45
+databases:
+  - name: ai-interview-db
+    plan: free

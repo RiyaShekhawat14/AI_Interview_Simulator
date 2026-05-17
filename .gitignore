@@ -1,0 +1,54 @@
+# Local environment
+.env
+.env.*
+backend/.env
+backend/.env.*
+frontend/.env
+frontend/.env.*
+
+# Runtime logs
+*.log
+*.journal
+
+# Temporary media and debug artifacts
+temp_*
+live_test_silence.wav
+valid_silence.wav
+dummy_resume.pdf
+TEST_WALKTHROUGH.md
+
+# Python caches
+__pycache__/
+*.pyc
+
+# Virtual environments
+.venv/
+backend/venv/
+
+# Frontend build artifacts
+frontend/node_modules/
+frontend/dist/
+
+# Local persistence artifacts
+backend/data/
+database/*.db
+database/*.db-journal
+
+# Large local datasets and training assets
+dataset/
+FER_Custom_Dataset/
+
+# Local model artifacts
+emotion_model.pth
+backend/models/*.pth
+!backend/models/best_model.pth
+
+# Generated guides and exports
+AI_Interview_Project_Complete_Interview_Guide.md
+AI_Interview_Project_Complete_Interview_Guide.pdf
+generate_interview_guide_pdf.py
+docs/*.pdf
+docs/generate_*_pdf.py
+
+# Legacy/experimental local files
+split_dataset.py

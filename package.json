@@ -1,0 +1,12 @@
+{
+  "name": "ai-interview-project-root",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "frontend:dev": "npm --prefix frontend run dev -- --host 127.0.0.1",
+    "frontend:build": "npm --prefix frontend run build",
+    "frontend:lint": "npm --prefix frontend run lint",
+    "frontend:preview": "npm --prefix frontend run preview",
+    "backend:dev": "powershell -ExecutionPolicy Bypass -File backend/run_backend.ps1 -KillExisting -Reload"
+  }
+}

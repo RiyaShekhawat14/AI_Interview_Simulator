@@ -1,0 +1,17 @@
+fastapi
+uvicorn
+numpy
+openai-whisper
+torch
+torchvision
+opencv-python
+sentence-transformers
+python-multipart
+pypdf
+langchain
+faiss-cpu
+requests
+sqlalchemy
+psycopg2-binary
+httpx
+redis
