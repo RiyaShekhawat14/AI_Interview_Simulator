@@ -1,9 +1,23 @@
 import axios from "axios";
 
+const LOCAL_BACKEND_URL = "http://localhost:8000";
+const DEPLOYED_BACKEND_URL = "https://ai-interview-backend-wooa.onrender.com";
+
+function resolveDefaultBaseUrl() {
+  if (typeof window !== "undefined") {
+    const host = window.location.hostname;
+    if (host === "localhost" || host === "127.0.0.1") {
+      return LOCAL_BACKEND_URL;
+    }
+  }
+
+  return DEPLOYED_BACKEND_URL;
+}
+
 export const BASE_URL =
   import.meta.env.VITE_API_BASE_URL ||
   import.meta.env.VITE_API_URL ||
-  "http://localhost:8000";
+  resolveDefaultBaseUrl();
 
 export function getBackendOriginLabel() {
   try {

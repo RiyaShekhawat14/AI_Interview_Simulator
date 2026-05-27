@@ -21,5 +21,6 @@ Create a `.env` from [frontend/.env.example](/c:/Users/hp/OneDrive/Desktop/AI_in
 ## Notes
 
 - The frontend expects the backend at `VITE_API_BASE_URL`.
-- Default local backend URL is `http://127.0.0.1:8000`.
+- Local development defaults to `http://localhost:8000`.
+- Production fallback is `https://ai-interview-backend-wooa.onrender.com`.
 - Camera, microphone, speech recognition, and text-to-speech are browser-dependent features.
