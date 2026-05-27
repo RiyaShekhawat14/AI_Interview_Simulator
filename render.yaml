@@ -28,6 +28,10 @@ services:
         value: "60"
       - key: RATE_LIMIT_MAX_REQUESTS
         value: "120"
+      - key: ENABLE_SPEECH_TO_TEXT
+        value: "false"
+      - key: ENABLE_EMOTION_DETECTION
+        value: "false"
       - key: CACHE_ENABLED
         value: "false"
       - key: REDIS_NAMESPACE

@@ -20,6 +20,13 @@ def is_production() -> bool:
     return app_environment() in _PRODUCTION_ENV_NAMES
 
 
+def env_flag(name: str, default: bool = False) -> bool:
+    raw_value = os.getenv(name)
+    if raw_value is None:
+        return default
+    return raw_value.strip().lower() not in {"0", "false", "no", "off"}
+
+
 def _parse_allowed_origins() -> list[str]:
     raw_value = os.getenv("ALLOWED_ORIGINS", "")
     return [origin.strip() for origin in raw_value.split(",") if origin.strip()]

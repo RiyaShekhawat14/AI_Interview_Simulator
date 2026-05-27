@@ -25,6 +25,7 @@ from services.persistence_service import (
 from services.question_service import generate_question_result
 from services.report_service import generate_interview_report
 from services.speech_service import speech_model_available, transcribe_audio
+from services.config_service import env_flag
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -34,6 +35,8 @@ router = APIRouter()
 GENERAL_QUESTION_LIMIT = 5
 DSA_QUESTION_LIMIT = 2
 SESSION_TTL_SECONDS = int(os.getenv("SESSION_TTL_SECONDS", "7200"))
+SPEECH_TO_TEXT_ENABLED = env_flag("ENABLE_SPEECH_TO_TEXT", default=True)
+EMOTION_DETECTION_ENABLED = env_flag("ENABLE_EMOTION_DETECTION", default=True)
 
 interview_sessions: dict[str, dict[str, Any]] = {}
 
@@ -284,6 +287,13 @@ async def speech_to_text(
     current_user: User = Depends(get_current_user),
 ):
     _ = current_user
+    if not SPEECH_TO_TEXT_ENABLED:
+        return {
+            "text": "",
+            "available": False,
+            "warning": "Speech-to-text is disabled in this deployment to reduce memory usage.",
+        }
+
     original_name = file.filename or "recording"
     guessed_extension = os.path.splitext(original_name)[1]
     if not guessed_extension:
@@ -327,6 +337,15 @@ async def detect_emotion_api(
     current_user: User = Depends(get_current_user),
 ):
     _ = current_user
+    if not EMOTION_DETECTION_ENABLED:
+        return {
+            "emotion": "Normal",
+            "confidence": 0.0,
+            "status": "disabled",
+            "reliable": False,
+            "details": {"message": "Emotion detection is disabled in this deployment to reduce memory usage."},
+        }
+
     try:
         image_bytes = await file.read()
         result = _normalize_emotion_result(detect_emotion_bytes(image_bytes))

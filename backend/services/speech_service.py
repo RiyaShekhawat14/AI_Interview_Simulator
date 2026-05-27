@@ -4,30 +4,46 @@ import wave
 
 import numpy as np
 
+from services.config_service import env_flag
+
 logger = logging.getLogger(__name__)
 
-try:
-    import whisper
-except Exception as error:
-    whisper = None
-    logger.warning("Whisper not available: %s", error)
-
 model = None
+whisper = None
+whisper_import_attempted = False
+SPEECH_TO_TEXT_ENABLED = env_flag("ENABLE_SPEECH_TO_TEXT", default=True)
+
+
+def _load_whisper_module():
+    global whisper, whisper_import_attempted
+    if whisper_import_attempted:
+        return whisper
+
+    whisper_import_attempted = True
+    try:
+        import whisper as whisper_module
+
+        whisper = whisper_module
+    except Exception as error:
+        whisper = None
+        logger.warning("Whisper not available: %s", error)
+    return whisper
 
 
 def load_model():
     global model
-    if whisper and model is None:
+    if not SPEECH_TO_TEXT_ENABLED:
+        return None
+
+    whisper_module = _load_whisper_module()
+    if whisper_module and model is None:
         try:
-            model = whisper.load_model("base")
+            model = whisper_module.load_model("base")
             logger.info("Whisper base model loaded successfully")
         except Exception as error:
             logger.warning("Error loading Whisper model: %s", error)
             model = None
     return model
-
-
-load_model()
 
 
 def speech_model_available() -> bool:
