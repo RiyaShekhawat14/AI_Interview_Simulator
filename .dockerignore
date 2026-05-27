@@ -1,0 +1,16 @@
+.git
+.gitignore
+.venv
+__pycache__
+*.pyc
+frontend/node_modules
+frontend/dist
+backend/.env
+backend/.env.*
+frontend/.env
+frontend/.env.*
+database
+dataset
+FER_Custom_Dataset
+emotion_model.pth
+docs/*.pdf

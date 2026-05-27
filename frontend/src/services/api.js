@@ -5,6 +5,14 @@ export const BASE_URL =
   import.meta.env.VITE_API_URL ||
   "http://localhost:8000";
 
+export function getBackendOriginLabel() {
+  try {
+    return new URL(BASE_URL).origin;
+  } catch {
+    return BASE_URL;
+  }
+}
+
 const AUTH_STORAGE_KEY = "ai_interview_auth";
 
 export function getStoredAuth() {

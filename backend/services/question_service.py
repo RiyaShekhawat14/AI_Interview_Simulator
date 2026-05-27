@@ -1,16 +1,12 @@
 import os
 import random
-import requests
 
-LLAMA_API_URL = os.getenv("LLAMA_API_URL", "http://127.0.0.1:11434/api/generate")
-LLAMA_MODEL = os.getenv("LLAMA_MODEL", "mistral:latest")
-LLAMA_FALLBACK_MODEL = os.getenv("LLAMA_FALLBACK_MODEL", "llama3:8b")
-LLAMA_TIMEOUT_SECONDS = int(os.getenv("LLAMA_TIMEOUT_SECONDS", "45"))
-DEFAULT_OLLAMA_URLS = [
-    "http://127.0.0.1:11434/api/generate",
-    "http://127.0.0.1:11435/api/generate",
-]
-LLM_DISABLED = False
+from services.ollama_service import (
+    LLAMA_API_URL,
+    LLAMA_MODEL,
+    LLAMA_TIMEOUT_SECONDS,
+    call_ollama_with_model_fallback,
+)
 
 GENERAL_FALLBACK_QUESTIONS = [
     "Tell me about yourself and your recent work.",
@@ -31,6 +27,12 @@ DSA_FALLBACK_QUESTIONS = [
 ]
 
 _last_fallback_question = None
+QUESTION_GENERATION_TIMEOUT_SECONDS = float(
+    os.getenv("QUESTION_GENERATION_TIMEOUT_SECONDS", str(min(8, LLAMA_TIMEOUT_SECONDS)))
+)
+DSA_GENERATION_TIMEOUT_SECONDS = float(
+    os.getenv("DSA_GENERATION_TIMEOUT_SECONDS", str(min(10, max(QUESTION_GENERATION_TIMEOUT_SECONDS, 8))))
+)
 
 
 def _fallback_question(category: str, asked_questions: list[str] | None = None) -> str:
@@ -62,75 +64,20 @@ def _clean_question(text: str) -> str:
         cleaned = f"{cleaned}?"
     return cleaned
 
-
-def reset_ollama_circuit() -> None:
-    global LLM_DISABLED
-    LLM_DISABLED = False
-
-
-def _call_llama(
-    prompt: str,
-    model: str = LLAMA_MODEL,
-    temperature: float = 0.7,
-    num_predict: int = 60,
-    timeout: int | None = None,
-) -> str:
-    global LLM_DISABLED
-    if LLM_DISABLED:
-        raise Exception("Ollama temporarily disabled after a connection failure.")
-
-    timeout = timeout or LLAMA_TIMEOUT_SECONDS
-    urls = [LLAMA_API_URL]
-    if not os.getenv("LLAMA_API_URL"):
-        urls.extend([url for url in DEFAULT_OLLAMA_URLS if url not in urls])
-
-    last_error = None
-    for url in urls:
-        try:
-            response = requests.post(
-                url,
-                json={
-                    "model": model,
-                    "prompt": prompt,
-                    "stream": False,
-                    "options": {
-                        "temperature": temperature,
-                        "num_predict": num_predict,
-                    },
-                },
-                timeout=timeout,
-            )
-            if response.status_code != 200:
-                last_error = Exception(
-                    f"Ollama status {response.status_code} at {url}: {response.text[:120]}"
-                )
-                continue
-
-            payload = response.json()
-            text = (
-                payload.get("response")
-                or payload.get("generated_text")
-                or payload.get("result")
-                or ""
-            ).strip()
-            if text:
-                return _clean_question(text.splitlines()[0].strip())
-            last_error = Exception(f"Empty Llama response from {url}")
-        except requests.RequestException as error:
-            last_error = error
-
-    LLM_DISABLED = True
-    raise Exception(last_error or "Unable to connect to Ollama on any configured port.")
-
-
 def check_ollama() -> str:
-    reset_ollama_circuit()
-    return _call_llama(
+    text, _ = call_ollama_with_model_fallback(
         "Reply with one short sentence confirming you are available for interview question generation.",
         temperature=0.0,
         num_predict=20,
         timeout=max(4, LLAMA_TIMEOUT_SECONDS),
     )
+    return _clean_question(text.splitlines()[0].strip())
+
+
+def _question_generation_timeout(question_category: str) -> float:
+    if question_category == "dsa":
+        return max(4.0, DSA_GENERATION_TIMEOUT_SECONDS)
+    return max(3.0, QUESTION_GENERATION_TIMEOUT_SECONDS)
 
 
 def generate_question_result(
@@ -168,30 +115,17 @@ def generate_question_result(
     error_message = ""
 
     try:
-        question = _call_llama(
+        question, model = call_ollama_with_model_fallback(
             prompt,
+            temperature=0.7,
             num_predict=38 if question_category == "dsa" else 18,
+            timeout=_question_generation_timeout(question_category),
         )
-        source = "ollama"
-        model = LLAMA_MODEL
+        question = _clean_question(question.splitlines()[0].strip())
+        source = "ollama-fallback-model" if model != LLAMA_MODEL else "ollama"
     except Exception as primary_error:
         error_message = str(primary_error)
-        if LLAMA_FALLBACK_MODEL and LLAMA_FALLBACK_MODEL != LLAMA_MODEL:
-            try:
-                reset_ollama_circuit()
-                question = _call_llama(
-                    prompt,
-                    model=LLAMA_FALLBACK_MODEL,
-                    num_predict=38 if question_category == "dsa" else 18,
-                )
-                source = "ollama-fallback-model"
-                model = LLAMA_FALLBACK_MODEL
-                error_message = ""
-            except Exception as fallback_error:
-                error_message = str(fallback_error)
-                question = _fallback_question(question_category, asked_questions)
-        else:
-            question = _fallback_question(question_category, asked_questions)
+        question = _fallback_question(question_category, asked_questions)
 
     if asked_questions and question in set(asked_questions):
         question = _fallback_question(question_category, asked_questions)

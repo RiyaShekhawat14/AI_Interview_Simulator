@@ -6,8 +6,13 @@ import logging
 import os
 import sys
 import time
+from pathlib import Path
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
+from services.env_service import load_env_file
+
+load_env_file(Path(__file__).resolve().parent / ".env")
 
 from routes.auth import router as auth_router
 from routes.code import router as code_router
@@ -17,6 +22,7 @@ from routes.metrics import router as metrics_router
 from routes.question import router as question_router
 from routes.report import router as report_router
 from routes.upload import router as upload_router
+from services.config_service import validate_runtime_config
 from services.db_service import init_database
 from services.metrics_service import record_request
 from services.rate_limit_service import check_rate_limit
@@ -101,6 +107,7 @@ async def request_metrics_middleware(request: Request, call_next):
 
 @app.on_event("startup")
 def startup() -> None:
+    validate_runtime_config()
     init_database()
 
 

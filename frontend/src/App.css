@@ -302,9 +302,9 @@ body {
 }
 
 .interview-page {
-  height: 100dvh;
+  min-height: 100dvh;
   padding: 24px;
-  overflow: hidden;
+  overflow-y: auto;
   background:
     radial-gradient(circle at top left, rgba(199, 104, 47, 0.14), transparent 20%),
     radial-gradient(circle at bottom right, rgba(23, 59, 57, 0.12), transparent 24%),
@@ -313,10 +313,11 @@ body {
 
 .interview-frame {
   width: min(1440px, 100%);
-  height: calc(100dvh - 48px);
+  min-height: calc(100dvh - 48px);
+  height: auto;
   margin: 0 auto;
   border-radius: 32px;
-  overflow: hidden;
+  overflow: clip;
   border: 1px solid rgba(114, 135, 167, 0.18);
   background:
     linear-gradient(180deg, rgba(12, 18, 26, 0.92), rgba(16, 23, 33, 0.96)),
@@ -327,11 +328,8 @@ body {
 }
 
 .interview-topbar {
-  display: flex;
-  justify-content: space-between;
-  gap: 18px;
-  align-items: center;
-  padding: 14px 18px;
+  display: block;
+  padding: 12px 18px;
   border-bottom: 1px solid rgba(121, 153, 197, 0.12);
   background:
     radial-gradient(circle at top left, rgba(56, 189, 248, 0.16), transparent 26%),
@@ -340,13 +338,12 @@ body {
 }
 
 .topbar-copy {
-  flex: 1 1 auto;
   min-width: 0;
 }
 
 .topbar-copy h1 {
-  margin: 4px 0 2px;
-  font-size: clamp(1.25rem, 1.7vw, 1.75rem);
+  margin: 2px 0 2px;
+  font-size: clamp(1.18rem, 1.55vw, 1.55rem);
   line-height: 1.12;
   color: #eef5ff;
 }
@@ -354,16 +351,8 @@ body {
 .topbar-copy p {
   margin: 0;
   color: #9eb0c6;
-  max-width: 520px;
-  font-size: 0.86rem;
-}
-
-.topbar-stats {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
-  flex: 0 0 min(470px, 42%);
-  min-width: 320px;
+  max-width: 620px;
+  font-size: 0.8rem;
 }
 
 .topbar-pill {
@@ -409,9 +398,9 @@ body {
 .interview-shell {
   flex: 1 1 auto;
   min-height: 0;
-  display: grid;
-  grid-template-rows: minmax(0, 1fr) auto;
-  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  overflow: visible;
   background:
     radial-gradient(circle at left center, rgba(56, 189, 248, 0.08), transparent 24%),
     radial-gradient(circle at right top, rgba(239, 68, 68, 0.08), transparent 20%),
@@ -419,19 +408,23 @@ body {
 }
 
 .interview-main-row {
-  min-height: 0;
+  height: calc(100dvh - 220px);
+  min-height: 620px;
+  max-height: calc(100dvh - 220px);
+  flex: 0 0 auto;
   display: grid;
-  grid-template-columns: minmax(340px, 0.92fr) minmax(460px, 1.24fr);
+  grid-template-columns: minmax(430px, 1.04fr) minmax(500px, 0.96fr);
   overflow: hidden;
 }
 
 .camera-panel {
-  padding: 24px;
+  padding: 22px;
   color: #f3f8ff;
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr);
-  gap: 18px;
-  min-height: 0;
+  grid-template-rows: auto minmax(360px, 1fr);
+  gap: 14px;
+  min-height: 100%;
+  height: 100%;
   overflow: hidden;
   border-right: 1px solid rgba(121, 153, 197, 0.12);
 }
@@ -446,15 +439,23 @@ body {
   gap: 16px;
 }
 
+.panel-heading {
+  align-items: end;
+}
+
 .video-stage {
   position: relative;
-  min-height: 340px;
+  min-height: 0;
   height: 100%;
   border-radius: 26px;
   overflow: hidden;
-  background: #060b12;
-  border: 1px solid rgba(123, 156, 199, 0.14);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.02);
+  background:
+    radial-gradient(circle at top right, rgba(255, 120, 86, 0.14), transparent 24%),
+    #060b12;
+  border: 1px solid rgba(123, 156, 199, 0.16);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.02),
+    0 18px 44px rgba(5, 12, 22, 0.28);
 }
 
 .video {
@@ -519,8 +520,8 @@ body {
 .emotion-chip,
 .score-badge {
   align-self: flex-start;
-  min-width: 130px;
-  padding: 14px 16px;
+  min-width: 118px;
+  padding: 12px 14px;
   border-radius: 20px;
   background: rgba(255, 255, 255, 0.07);
   border: 1px solid rgba(121, 153, 197, 0.14);
@@ -547,7 +548,7 @@ body {
 .score-badge strong {
   display: block;
   margin-top: 4px;
-  font-size: 24px;
+  font-size: 22px;
 }
 
 .camera-stats {
@@ -577,14 +578,21 @@ body {
 }
 
 .chat-panel {
-  padding: 24px;
+  padding: 22px;
   display: grid;
   grid-template-rows: auto minmax(0, 1fr) auto;
-  gap: 18px;
+  gap: 14px;
   min-width: 0;
-  min-height: 0;
+  min-height: 100%;
+  height: 100%;
   overflow: hidden;
   color: #ecf3fc;
+  background:
+    linear-gradient(180deg, rgba(10, 18, 28, 0.82), rgba(10, 18, 28, 0.72));
+}
+
+.chat-panel.dsa-mode {
+  grid-template-rows: auto minmax(140px, 0.34fr) minmax(380px, 0.66fr);
 }
 
 .header-actions,
@@ -598,11 +606,14 @@ body {
 
 .chat-header {
   align-items: start;
+  padding-bottom: 2px;
+  border-bottom: 1px solid rgba(121, 153, 197, 0.08);
+  margin-bottom: 2px;
 }
 
 .chat-panel h1 {
-  margin: 6px 0 0;
-  font-size: clamp(1.35rem, 2vw, 2rem);
+  margin: 4px 0 0;
+  font-size: clamp(1.28rem, 1.7vw, 1.72rem);
   line-height: 1.08;
 }
 
@@ -613,16 +624,23 @@ body {
 }
 
 .interview-status-row {
-  display: grid;
-  grid-template-columns: 1.05fr 1.2fr 0.9fr;
-  gap: 16px;
-  padding: 18px 24px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px 22px 20px;
   border-top: 1px solid rgba(121, 153, 197, 0.12);
   background: rgba(6, 11, 18, 0.38);
+  min-height: 0;
+  overflow: visible;
 }
 
 .status-group {
   min-width: 0;
+}
+
+.overview-group,
+.status-group {
+  flex: 0 0 auto;
 }
 
 .status-group-title {
@@ -636,7 +654,7 @@ body {
 
 .session-chip,
 .health-item {
-  padding: 14px 16px;
+  padding: 12px 14px;
   border-radius: 18px;
   border: 1px solid rgba(121, 153, 197, 0.14);
   background: rgba(255, 255, 255, 0.05);
@@ -647,6 +665,25 @@ body {
 .health-item strong {
   display: block;
   margin-top: 6px;
+}
+
+.overview-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.camera-stats,
+.session-bar,
+.camera-health-stack,
+.overview-grid {
+  align-items: stretch;
+}
+
+.live-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .health-list {
@@ -694,32 +731,39 @@ body {
   padding-right: 8px;
   min-width: 0;
   padding-bottom: 4px;
-  border-radius: 22px;
-  border: 1px solid rgba(121, 153, 197, 0.1);
-  background: rgba(7, 13, 20, 0.42);
-  padding: 18px 14px 4px;
+  border-radius: 28px;
+  border: 1px solid rgba(121, 153, 197, 0.08);
+  background:
+    radial-gradient(circle at top, rgba(56, 189, 248, 0.06), transparent 28%),
+    rgba(7, 13, 20, 0.5);
+  padding: 22px 18px 10px;
+  scrollbar-gutter: stable;
 }
 
 .msg {
   width: fit-content;
-  max-width: min(86%, 760px);
-  margin: 0 0 14px;
-  padding: 14px 16px;
+  max-width: min(78%, 680px);
+  margin: 0 0 12px;
+  padding: 13px 16px;
   border-radius: 20px;
-  line-height: 1.5;
+  line-height: 1.45;
+  position: relative;
 }
 
 .msg.ai {
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(121, 153, 197, 0.14);
-  box-shadow: 0 10px 24px rgba(8, 15, 26, 0.12);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.085), rgba(255, 255, 255, 0.045));
+  border: 1px solid rgba(121, 153, 197, 0.12);
+  box-shadow: 0 10px 24px rgba(8, 15, 26, 0.14);
   color: #eff6ff;
+  border-top-left-radius: 8px;
 }
 
 .msg.user {
   margin-left: auto;
-  background: linear-gradient(135deg, #ea580c, #b45309);
+  background: linear-gradient(135deg, #f97316, #c2410c 72%);
   color: white;
+  border-top-right-radius: 8px;
+  box-shadow: 0 12px 24px rgba(194, 65, 12, 0.26);
 }
 
 .msg.meta {
@@ -774,16 +818,24 @@ body {
 }
 
 .composer-card {
-  padding: 18px;
+  padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 12px;
   flex: 0 0 auto;
   min-height: 0;
-  overflow: hidden;
+  overflow: auto;
   background:
-    linear-gradient(180deg, rgba(12, 20, 30, 0.78), rgba(14, 25, 37, 0.92));
-  border-color: rgba(121, 153, 197, 0.16);
+    linear-gradient(180deg, rgba(13, 22, 33, 0.9), rgba(14, 25, 37, 0.96));
+  border-color: rgba(121, 153, 197, 0.14);
+  max-height: min(32vh, 320px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+.dsa-composer {
+  max-height: none;
+  min-height: 380px;
+  flex: 1 1 auto;
 }
 
 .composer-header p,
@@ -831,11 +883,11 @@ body {
 }
 
 .voice-note {
-  margin-top: 12px;
+  margin-top: 6px;
 }
 
 .answer-editor {
-  min-height: 120px;
+  min-height: 112px;
 }
 
 .ide-shell {
@@ -846,6 +898,11 @@ body {
   overflow: hidden;
   background: #0b1118;
   min-height: 0;
+}
+
+.dsa-composer .ide-shell {
+  min-height: 100%;
+  flex: 1 1 auto;
 }
 
 .ide-sidebar {
@@ -877,6 +934,9 @@ body {
 
 .ide-editor-pane {
   padding: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
 
 .ide-toolbar {
@@ -886,6 +946,14 @@ body {
   border-bottom: 1px solid rgba(84, 117, 160, 0.2);
   background: #131d28;
   color: #b6c8db;
+}
+
+.dsa-composer .code-editor {
+  min-height: 300px;
+  height: 100%;
+  flex: 1 1 auto;
+  border: none;
+  border-radius: 0;
 }
 
 .button-group,
@@ -915,18 +983,21 @@ button:disabled {
 }
 
 .button-primary {
-  background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+  background: linear-gradient(135deg, #f97316, #c2410c);
   color: white;
+  box-shadow: 0 12px 22px rgba(194, 65, 12, 0.24);
 }
 
 .button-secondary {
-  background: var(--secondary-soft);
-  color: var(--secondary);
+  background: rgba(219, 232, 230, 0.14);
+  color: #e4f2ef;
+  border: 1px solid rgba(125, 166, 162, 0.18);
 }
 
 .button-danger {
-  background: var(--danger);
+  background: linear-gradient(135deg, #b42318, #8f1d14);
   color: white;
+  box-shadow: 0 12px 22px rgba(143, 29, 20, 0.22);
 }
 
 .loading-text,
@@ -1276,7 +1347,6 @@ button:disabled {
   .hero-card-large,
   .setup-layout,
   .interview-main-row,
-  .interview-status-row,
   .interview-shell {
     grid-template-columns: 1fr;
     flex: initial;
@@ -1285,7 +1355,8 @@ button:disabled {
   }
 
   .interview-shell {
-    grid-template-rows: auto auto;
+    display: flex;
+    flex-direction: column;
   }
 
   .interview-page {
@@ -1294,21 +1365,15 @@ button:disabled {
     overflow: visible;
   }
 
-  .interview-topbar {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 14px;
-  }
-
-  .topbar-stats {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    flex: initial;
-    min-width: 0;
-  }
-
   .interview-frame {
     height: auto;
     overflow: visible;
+  }
+
+  .interview-main-row {
+    height: auto;
+    min-height: auto;
+    max-height: none;
   }
 
   .interview-divider {
@@ -1316,7 +1381,8 @@ button:disabled {
   }
 
   .session-bar,
-  .camera-stats {
+  .camera-stats,
+  .overview-grid {
     grid-template-columns: 1fr;
   }
 
@@ -1337,6 +1403,14 @@ button:disabled {
 
   .chat-area {
     min-height: 260px;
+  }
+
+  .interview-status-row {
+    overflow: visible;
+  }
+
+  .chat-panel.dsa-mode {
+    grid-template-rows: auto minmax(220px, auto) auto;
   }
 }
 
@@ -1420,6 +1494,10 @@ button:disabled {
 
   .ide-shell {
     grid-template-columns: 1fr;
+  }
+
+  .dsa-composer {
+    min-height: 0;
   }
 
   .ide-sidebar {

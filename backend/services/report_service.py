@@ -1,18 +1,8 @@
 from collections import Counter
-import os
 import re
-import requests
 from typing import Any
 
-LLAMA_API_URL = os.getenv("LLAMA_API_URL", "http://127.0.0.1:11434/api/generate")
-LLAMA_MODEL = os.getenv("LLAMA_MODEL", "mistral:latest")
-LLAMA_FALLBACK_MODEL = os.getenv("LLAMA_FALLBACK_MODEL", "llama3:8b")
-DEFAULT_OLLAMA_URLS = [
-    "http://127.0.0.1:11434/api/generate",
-    "http://127.0.0.1:11435/api/generate",
-]
-LLM_DISABLED = False
-LLAMA_TIMEOUT_SECONDS = int(os.getenv("LLAMA_TIMEOUT_SECONDS", "45"))
+from services.ollama_service import call_ollama_with_model_fallback
 
 FILLER_WORDS = [
     r"\bum\b",
@@ -28,59 +18,13 @@ FILLER_WORDS = [
     r"\berr\b",
 ]
 
-
-def _call_llama(prompt: str, model: str = LLAMA_MODEL, temperature: float = 0.5, num_predict: int = 350, timeout: int | None = None) -> str:
-    global LLM_DISABLED
-    if LLM_DISABLED:
-        raise Exception("Ollama temporarily disabled after a connection failure.")
-
-    timeout = timeout or LLAMA_TIMEOUT_SECONDS
-    urls = [LLAMA_API_URL]
-    if not os.getenv("LLAMA_API_URL"):
-        urls.extend([url for url in DEFAULT_OLLAMA_URLS if url not in urls])
-
-    last_error = None
-    for url in urls:
-        try:
-            response = requests.post(
-                url,
-                json={
-                    "model": model,
-                    "prompt": prompt,
-                    "stream": False,
-                    "options": {
-                        "temperature": temperature,
-                        "num_predict": num_predict,
-                    },
-                },
-                timeout=timeout,
-            )
-            if response.status_code != 200:
-                last_error = Exception(f"Ollama status {response.status_code} at {url}: {response.text[:120]}")
-                continue
-
-            payload = response.json()
-            text = (payload.get("response") or payload.get("generated_text") or payload.get("result") or "").strip()
-            if text:
-                return text
-            last_error = Exception(f"Empty Llama response from {url}")
-        except requests.RequestException as error:
-            last_error = error
-
-    LLM_DISABLED = True
-    raise Exception(last_error or "Unable to connect to Ollama on any configured port.")
-
-
 def _call_llama_with_fallback(prompt: str, temperature: float = 0.4, num_predict: int = 350) -> str:
-    try:
-        return _call_llama(prompt, model=LLAMA_MODEL, temperature=temperature, num_predict=num_predict)
-    except Exception as primary_error:
-        if LLAMA_FALLBACK_MODEL and LLAMA_FALLBACK_MODEL != LLAMA_MODEL:
-            try:
-                return _call_llama(prompt, model=LLAMA_FALLBACK_MODEL, temperature=temperature, num_predict=num_predict)
-            except Exception:
-                pass
-        raise primary_error
+    response, _ = call_ollama_with_model_fallback(
+        prompt,
+        temperature=temperature,
+        num_predict=num_predict,
+    )
+    return response
 
 
 def _count_filler_words(text: str) -> int:

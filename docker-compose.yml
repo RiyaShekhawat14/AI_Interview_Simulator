@@ -1,0 +1,93 @@
+services:
+  ollama:
+    image: ollama/ollama:latest
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  ollama-init:
+    image: ollama/ollama:latest
+    depends_on:
+      ollama:
+        condition: service_healthy
+    environment:
+      OLLAMA_HOST: http://ollama:11434
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-mistral:latest}
+      OLLAMA_FALLBACK_MODEL: ${OLLAMA_FALLBACK_MODEL:-llama3:8b}
+    entrypoint: ["/bin/sh", "-c"]
+    command: >-
+      until ollama list >/dev/null 2>&1; do
+        echo 'Waiting for Ollama...';
+        sleep 2;
+      done;
+      ollama pull "$OLLAMA_MODEL";
+      if [ -n "$OLLAMA_FALLBACK_MODEL" ] && [ "$OLLAMA_FALLBACK_MODEL" != "$OLLAMA_MODEL" ]; then
+        ollama pull "$OLLAMA_FALLBACK_MODEL";
+      fi
+    profiles:
+      - model-setup
+
+  backend:
+    build:
+      context: ./backend
+    restart: unless-stopped
+    depends_on:
+      ollama:
+        condition: service_healthy
+    environment:
+      APP_ENV: ${APP_ENV:-development}
+      DATABASE_URL: ${DATABASE_URL:-sqlite:////data/app.db}
+      JWT_SECRET: ${JWT_SECRET:-dev-secret-change-me}
+      JWT_EXPIRES_MINUTES: ${JWT_EXPIRES_MINUTES:-720}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:4173}
+      SESSION_TTL_SECONDS: ${SESSION_TTL_SECONDS:-7200}
+      RATE_LIMIT_ENABLED: ${RATE_LIMIT_ENABLED:-true}
+      RATE_LIMIT_WINDOW_SECONDS: ${RATE_LIMIT_WINDOW_SECONDS:-60}
+      RATE_LIMIT_MAX_REQUESTS: ${RATE_LIMIT_MAX_REQUESTS:-120}
+      CACHE_ENABLED: ${CACHE_ENABLED:-true}
+      REDIS_URL: ${REDIS_URL:-}
+      REDIS_NAMESPACE: ${REDIS_NAMESPACE:-ai_interview}
+      HEALTH_CACHE_TTL_SECONDS: ${HEALTH_CACHE_TTL_SECONDS:-15}
+      QUESTION_CACHE_TTL_SECONDS: ${QUESTION_CACHE_TTL_SECONDS:-180}
+      CODE_CACHE_TTL_SECONDS: ${CODE_CACHE_TTL_SECONDS:-300}
+      REPORT_CACHE_TTL_SECONDS: ${REPORT_CACHE_TTL_SECONDS:-30}
+      LLAMA_API_URL: ${LLAMA_API_URL:-http://ollama:11434/api/generate}
+      LLAMA_MODEL: ${LLAMA_MODEL:-mistral:latest}
+      LLAMA_FALLBACK_MODEL: ${LLAMA_FALLBACK_MODEL:-llama3:8b}
+      LLAMA_TIMEOUT_SECONDS: ${LLAMA_TIMEOUT_SECONDS:-45}
+      LLAMA_CONNECT_TIMEOUT_SECONDS: ${LLAMA_CONNECT_TIMEOUT_SECONDS:-1.5}
+      LLAMA_DISABLE_COOLDOWN_SECONDS: ${LLAMA_DISABLE_COOLDOWN_SECONDS:-30}
+    volumes:
+      - backend-data:/data
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=5)"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:8000}
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "4173:80"
+
+volumes:
+  backend-data:
+  ollama-data:

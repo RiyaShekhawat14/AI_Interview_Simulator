@@ -5,6 +5,32 @@ param(
   [switch]$AllowExisting
 )
 
+function Import-DotEnvFile {
+  param([string]$EnvFilePath)
+
+  if (-not (Test-Path $EnvFilePath)) {
+    return
+  }
+
+  Get-Content $EnvFilePath | ForEach-Object {
+    $line = $_.Trim()
+    if (-not $line -or $line.StartsWith("#")) {
+      return
+    }
+
+    $parts = $line -split "=", 2
+    if ($parts.Length -ne 2) {
+      return
+    }
+
+    $key = $parts[0].Trim()
+    $value = $parts[1].Trim().Trim('"').Trim("'")
+    if ($key -and -not (Test-Path "Env:$key")) {
+      Set-Item -Path "Env:$key" -Value $value
+    }
+  }
+}
+
 function Test-PortOpen {
   param([int]$TargetPort)
 
@@ -55,6 +81,8 @@ function Get-ProcessSummary {
     return "PID $ProcessId"
   }
 }
+
+Import-DotEnvFile -EnvFilePath (Join-Path $PSScriptRoot ".env")
 
 if (-not $env:ALLOWED_ORIGINS) {
   $env:ALLOWED_ORIGINS = "http://localhost:5173,http://localhost:5174,http://localhost:5175"

@@ -14,6 +14,10 @@ npm run dev -- --host 127.0.0.1 --port 5175
 npm run build
 ```
 
+## Environment
+
+Create a `.env` from [frontend/.env.example](/c:/Users/hp/OneDrive/Desktop/AI_interview_project/frontend/.env.example) and point `VITE_API_BASE_URL` at your deployed backend.
+
 ## Notes
 
 - The frontend expects the backend at `VITE_API_BASE_URL`.

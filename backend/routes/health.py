@@ -2,6 +2,7 @@ from fastapi import APIRouter
 import time
 import os
 from services.cache_service import get_or_set_cached, make_cache_key, cache_stats
+from services.ollama_service import ollama_circuit_state
 from services.persistence_service import persistence_enabled
 from services.question_service import check_ollama
 from services.question_service import LLAMA_API_URL, LLAMA_MODEL
@@ -40,5 +41,6 @@ def health_check():
         status["ollama_latency_ms"] = health_payload["latency_ms"]
     except Exception as error:
         status["ollama_error"] = str(error)
+    status["ollama_circuit"] = ollama_circuit_state()
     status["cache"] = cache_stats()
     return status

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { checkHealth, uploadResume } from "../services/api";
+import { checkHealth, getBackendOriginLabel, uploadResume } from "../services/api";
 
 function Setup() {
   const navigate = useNavigate();
@@ -67,7 +67,7 @@ function Setup() {
 
       if (backendMessage.includes("Network Error") || backendMessage.includes("timeout")) {
         backendMessage =
-          "Unable to reach the backend server. Make sure the backend is running at http://localhost:8000 and refresh the page.";
+          `Unable to reach the backend server at ${getBackendOriginLabel()}. Check your deployed backend URL and refresh the page.`;
       }
 
       setError(backendMessage);

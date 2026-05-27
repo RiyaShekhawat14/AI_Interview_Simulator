@@ -12,6 +12,20 @@ import {
 import "../App.css";
 
 const CAMERA_SAMPLE_INTERVAL_MS = 3500;
+const GENERAL_QUESTION_LIMIT = 5;
+
+function resolveInterviewPhase(step) {
+  if (step?.type === "code") {
+    return "dsa";
+  }
+  if (step?.phase) {
+    return step.phase;
+  }
+  if ((step?.general_questions_completed || 0) >= GENERAL_QUESTION_LIMIT) {
+    return "dsa";
+  }
+  return "general";
+}
 
 function Interview() {
   const location = useLocation();
@@ -45,6 +59,7 @@ function Interview() {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const chatAreaRef = useRef(null);
+  const composerRef = useRef(null);
   const recognitionRef = useRef(null);
   const cameraStreamRef = useRef(null);
   const emotionLoopRef = useRef(null);
@@ -62,6 +77,16 @@ function Interview() {
     { value: "go", label: "Go", extension: "go" },
     { value: "rust", label: "Rust", extension: "rs" },
   ];
+
+  function applyInterviewStep(step) {
+    const resolvedPhase = resolveInterviewPhase(step);
+    setCurrentQuestion(step.question || "");
+    setCurrentPhase(resolvedPhase);
+    setCurrentLanguage(step.language || "python");
+    setQuestionCount(step.question_number || 1);
+    setQuestionSource(step.question_source || "fallback");
+    setQuestionModel(step.question_model || "");
+  }
 
   async function refreshHealth() {
     try {
@@ -208,12 +233,7 @@ function Interview() {
         throw new Error("Interview session did not return an opening question.");
       }
 
-      setCurrentQuestion(firstQuestion.question);
-      setCurrentPhase(firstQuestion.phase);
-      setCurrentLanguage(firstQuestion.language || "python");
-      setQuestionCount(firstQuestion.question_number || 1);
-      setQuestionSource(firstQuestion.question_source || "fallback");
-      setQuestionModel(firstQuestion.question_model || "");
+      applyInterviewStep(firstQuestion);
       setMessages([{ type: "ai", text: firstQuestion.question }]);
       speak(firstQuestion.question, true);
     } catch (error) {
@@ -346,14 +366,9 @@ function Interview() {
         return;
       }
 
-      setCurrentQuestion(next.question);
-      setCurrentPhase(next.phase);
-      setCurrentLanguage(next.language || currentLanguage);
-      setQuestionCount(next.question_number || questionCount + 1);
-      setQuestionSource(next.question_source || "fallback");
-      setQuestionModel(next.question_model || "");
+      applyInterviewStep({ ...next, language: next.language || currentLanguage });
       setMessages((previous) => [...previous, { type: "ai", text: next.question }]);
-      speak(next.question, next.phase === "general");
+      speak(next.question, resolveInterviewPhase(next) === "general");
     } catch (error) {
       console.error("Error advancing interview:", error);
       setMessages((previous) => [
@@ -443,6 +458,11 @@ function Interview() {
   }, [messages, loading]);
 
   useEffect(() => {
+    if (currentPhase !== "dsa") return;
+    composerRef.current?.scrollIntoView?.({ behavior: "smooth", block: "nearest" });
+  }, [currentPhase, currentQuestion]);
+
+  useEffect(() => {
     if (!role || !company) {
       navigate("/setup");
       return;
@@ -487,28 +507,6 @@ function Interview() {
             <h1>{role} Interview Simulation</h1>
             <p>{company} focused mock interview with live camera, voice support, and report generation.</p>
           </div>
-          <div className="topbar-stats">
-            <div className="topbar-pill live-pill">
-              <span>Broadcast</span>
-              <strong><i className="live-dot" />Live Studio</strong>
-            </div>
-            <div className="topbar-pill">
-              <span>Current Round</span>
-              <strong>{currentPhase === "dsa" ? "DSA / Coding" : "Behavioral / Technical"}</strong>
-            </div>
-            <div className="topbar-pill">
-              <span>Question Source</span>
-              <strong>
-                {questionSource === "ollama" || questionSource === "ollama-fallback-model"
-                  ? questionModel || "Ollama"
-                  : "Fallback"}
-              </strong>
-            </div>
-            <div className="topbar-pill">
-              <span>Live Emotion</span>
-              <strong>{currentEmotion}</strong>
-            </div>
-          </div>
         </div>
         <div className="interview-shell">
           <div className="interview-main-row">
@@ -540,7 +538,7 @@ function Interview() {
               <canvas ref={canvasRef} style={{ display: "none" }} />
             </section>
 
-            <section className="chat-panel">
+            <section className={`chat-panel ${currentPhase === "dsa" ? "dsa-mode" : ""}`}>
               <div className="chat-header">
                 <div>
                   <div className="eyebrow">AI Interviewer</div>
@@ -595,7 +593,10 @@ function Interview() {
                 ))}
               </div>
 
-              <div className="composer-card">
+              <div
+                ref={composerRef}
+                className={`composer-card ${currentPhase === "dsa" ? "dsa-composer" : ""}`}
+              >
                 <div className="composer-header">
                   <div>
                     <strong>
@@ -681,6 +682,32 @@ function Interview() {
           </div>
 
           <div className="interview-status-row">
+            <div className="status-group overview-group">
+              <div className="status-group-title">Live Overview</div>
+              <div className="overview-grid">
+                <div className="session-chip neutral">
+                  <span>Broadcast</span>
+                  <strong className="live-inline"><i className="live-dot" />Live Studio</strong>
+                </div>
+                <div className="session-chip neutral">
+                  <span>Current Round</span>
+                  <strong>{currentPhase === "dsa" ? "DSA / Coding" : "Behavioral / Technical"}</strong>
+                </div>
+                <div className="session-chip neutral">
+                  <span>Question Source</span>
+                  <strong>
+                    {questionSource === "ollama" || questionSource === "ollama-fallback-model"
+                      ? questionModel || "Ollama"
+                      : "Fallback"}
+                  </strong>
+                </div>
+                <div className="session-chip neutral">
+                  <span>Live Emotion</span>
+                  <strong>{currentEmotion}</strong>
+                </div>
+              </div>
+            </div>
+
             <div className="status-group">
               <div className="status-group-title">Live Camera Status</div>
               <div className="camera-stats">

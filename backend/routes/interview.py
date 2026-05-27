@@ -110,14 +110,20 @@ def _append_text_response(session: dict[str, Any], answer: str, emotion_payload:
 
 
 def _next_phase_payload(session: dict[str, Any], question_data: dict[str, Any]) -> dict[str, Any]:
+    general_completed = session["question_count"]
+    dsa_completed = session["dsa_count"]
     payload = {
         "question": question_data["question"],
         "phase": session["phase"],
-        "question_number": session["question_count"] + session["dsa_count"],
+        "question_number": general_completed + dsa_completed,
         "type": "text",
         "question_source": question_data.get("source", "fallback"),
         "question_model": question_data.get("model", "unknown"),
         "question_error": question_data.get("error", ""),
+        "general_questions_completed": general_completed,
+        "general_questions_remaining": max(GENERAL_QUESTION_LIMIT - general_completed, 0),
+        "dsa_questions_completed": dsa_completed,
+        "dsa_questions_remaining": max(DSA_QUESTION_LIMIT - dsa_completed, 0),
     }
 
     if session["phase"] == "dsa":

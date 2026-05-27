@@ -1,60 +1,6 @@
 import os
-import requests
 
-LLAMA_API_URL = os.getenv("LLAMA_API_URL", "http://127.0.0.1:11434/api/generate")
-LLAMA_MODEL = os.getenv("LLAMA_MODEL", "mistral:latest")
-LLAMA_FALLBACK_MODEL = os.getenv("LLAMA_FALLBACK_MODEL", "llama3:8b")
-DEFAULT_OLLAMA_URLS = [
-    "http://127.0.0.1:11434/api/generate",
-    "http://127.0.0.1:11435/api/generate",
-]
-LLM_DISABLED = False
-LLAMA_TIMEOUT_SECONDS = int(os.getenv("LLAMA_TIMEOUT_SECONDS", "45"))
-
-
-def _call_llama(prompt, model=LLAMA_MODEL, temperature=0.5, num_predict=220, timeout=None):
-    global LLM_DISABLED
-    if LLM_DISABLED:
-        raise Exception("Ollama temporarily disabled after a connection failure.")
-
-    timeout = timeout or LLAMA_TIMEOUT_SECONDS
-    urls = [LLAMA_API_URL]
-    if not os.getenv("LLAMA_API_URL"):
-        urls.extend([url for url in DEFAULT_OLLAMA_URLS if url not in urls])
-
-    last_error = None
-    for url in urls:
-        try:
-            response = requests.post(
-                url,
-                json={
-                    "model": model,
-                    "prompt": prompt,
-                    "stream": False,
-                    "options": {
-                        "temperature": temperature,
-                        "num_predict": num_predict,
-                    },
-                },
-                timeout=timeout,
-            )
-
-            if response.status_code != 200:
-                last_error = Exception(
-                    f"Ollama status {response.status_code} at {url}: {response.text[:120]}"
-                )
-                continue
-
-            result = response.json()
-            output = (result.get("response") or result.get("generated_text") or result.get("result") or "").strip()
-            if output:
-                return output
-            last_error = Exception(f"Empty Llama response from {url}")
-        except requests.RequestException as error:
-            last_error = error
-
-    LLM_DISABLED = True
-    raise Exception(last_error or "Unable to connect to Ollama on any configured port.")
+from services.ollama_service import call_ollama_with_model_fallback
 
 
 def _fallback_evaluation(question, code, language):
@@ -113,13 +59,11 @@ Respond in plain text.
 """
 
     try:
-        evaluation = _call_llama(prompt)
+        evaluation, _ = call_ollama_with_model_fallback(
+            prompt,
+            temperature=0.5,
+            num_predict=220,
+        )
         return {"evaluation": evaluation}
     except Exception:
-        if LLAMA_FALLBACK_MODEL and LLAMA_FALLBACK_MODEL != LLAMA_MODEL:
-            try:
-                evaluation = _call_llama(prompt, model=LLAMA_FALLBACK_MODEL)
-                return {"evaluation": evaluation}
-            except Exception:
-                pass
         return _fallback_evaluation(question, code, language)

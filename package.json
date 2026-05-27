@@ -7,6 +7,7 @@
     "frontend:build": "npm --prefix frontend run build",
     "frontend:lint": "npm --prefix frontend run lint",
     "frontend:preview": "npm --prefix frontend run preview",
-    "backend:dev": "powershell -ExecutionPolicy Bypass -File backend/run_backend.ps1 -KillExisting -Reload"
+    "backend:dev": "powershell -ExecutionPolicy Bypass -File backend/run_backend.ps1 -KillExisting -Reload",
+    "backend:smoke": ".\\.venv\\Scripts\\python.exe backend\\smoke_test.py"
   }
 }
