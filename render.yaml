@@ -21,7 +21,7 @@ services:
       - key: SESSION_TTL_SECONDS
         value: "7200"
       - key: ALLOWED_ORIGINS
-        value: https://your-frontend-domain.vercel.app
+        value: https://ai-interview-simulator-pc8iy5enf-riyashekhawat14s-projects.vercel.app
       - key: RATE_LIMIT_ENABLED
         value: "true"
       - key: RATE_LIMIT_WINDOW_SECONDS
