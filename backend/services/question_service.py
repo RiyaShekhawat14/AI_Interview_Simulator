@@ -19,11 +19,11 @@ GENERAL_FALLBACK_QUESTIONS = [
 ]
 
 DSA_FALLBACK_QUESTIONS = [
-    "Given an array of integers, return the two indices whose values add up to a target.",
-    "Design an LRU cache with O(1) get and put operations.",
-    "Find the first non-repeating character in a string efficiently.",
-    "Detect whether a linked list contains a cycle and explain the complexity.",
-    "Merge overlapping intervals from a list of start and end pairs.",
+    "Two Sum: Given an integer array nums and an integer target, return the indices of the two numbers such that they add up to target. Assume exactly one valid answer exists and each element may be used at most once.",
+    "Longest Substring Without Repeating Characters: Given a string s, return the length of the longest substring that contains no repeated characters. Explain the sliding-window approach and its complexity.",
+    "Merge Intervals: Given an array of intervals where intervals[i] = [start, end], merge all overlapping intervals and return the condensed result sorted by start time.",
+    "Top K Frequent Elements: Given an integer array nums and an integer k, return the k most frequent elements. Aim for a solution better than O(n log n) when possible.",
+    "LRU Cache Design: Implement an LRU cache that supports get(key) and put(key, value) in O(1) average time, evicting the least recently used item when capacity is exceeded.",
 ]
 
 _last_fallback_question = None
