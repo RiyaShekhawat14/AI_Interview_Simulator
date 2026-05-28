@@ -50,7 +50,7 @@ services:
         value: https://ai-interview-backend-wooa.onrender.com
 
       - key: ALLOWED_ORIGINS
-        sync: false
+        value: https://ai-interview-simulator-git-main-riyashekhawat14s-projects.vercel.app,https://ai-interview-simulator-870pz7p46-riyashekhawat14s-projects.vercel.app
 
       - key: RATE_LIMIT_ENABLED
         value: "true"
