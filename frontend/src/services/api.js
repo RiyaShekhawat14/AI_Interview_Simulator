@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const LOCAL_BACKEND_URL = "http://localhost:8000";
-const DEPLOYED_BACKEND_URL = "https://ai-interview-backend-wooa.onrender.com";
+const DEPLOYED_BACKEND_URL = "https://ai-interview-simulator-iu72.onrender.com";
 
 function resolveDefaultBaseUrl() {
   if (typeof window !== "undefined") {
