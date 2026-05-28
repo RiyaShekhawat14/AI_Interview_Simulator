@@ -90,10 +90,10 @@ function Home() {
                 </>
               ) : (
                 <>
-                  <button className="button-primary" onClick={() => navigate("/auth")}>
+                  <button className="button-primary" onClick={() => navigate("/auth?mode=login")}>
                     Sign In To Start
                   </button>
-                  <button className="button-secondary" onClick={() => navigate("/auth")}>
+                  <button className="button-secondary" onClick={() => navigate("/auth?mode=register")}>
                     Create Account
                   </button>
                 </>

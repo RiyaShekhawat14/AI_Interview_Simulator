@@ -1,18 +1,27 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 import { loginUser, registerUser } from "../services/api";
+
+function resolveMode(search) {
+  const params = new URLSearchParams(search);
+  return params.get("mode") === "register" ? "register" : "login";
+}
 
 function Auth() {
   const navigate = useNavigate();
   const location = useLocation();
   const redirectTo = location.state?.redirectTo || "/";
-  const [mode, setMode] = useState("login");
+  const [mode, setMode] = useState(() => resolveMode(location.search));
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    setMode(resolveMode(location.search));
+  }, [location.search]);
 
   const submit = async () => {
     setError("");
@@ -49,14 +58,14 @@ function Auth() {
           <div className="hero-actions">
             <button
               className={mode === "login" ? "button-primary" : "button-secondary"}
-              onClick={() => setMode("login")}
+              onClick={() => navigate("/auth?mode=login", { replace: true, state: location.state })}
               type="button"
             >
               Sign In
             </button>
             <button
               className={mode === "register" ? "button-primary" : "button-secondary"}
-              onClick={() => setMode("register")}
+              onClick={() => navigate("/auth?mode=register", { replace: true, state: location.state })}
               type="button"
             >
               Create Account
