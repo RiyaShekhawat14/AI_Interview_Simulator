@@ -20,8 +20,9 @@ services:
 
   - type: web
     name: ai-interview-backend
-    env: python
+    runtime: python
     rootDir: backend
+    plan: free
 
     healthCheckPath: /health
 
