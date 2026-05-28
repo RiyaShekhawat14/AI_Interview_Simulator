@@ -33,6 +33,9 @@ QUESTION_GENERATION_TIMEOUT_SECONDS = float(
 DSA_GENERATION_TIMEOUT_SECONDS = float(
     os.getenv("DSA_GENERATION_TIMEOUT_SECONDS", str(min(10, max(QUESTION_GENERATION_TIMEOUT_SECONDS, 8))))
 )
+HEALTH_CHECK_TIMEOUT_SECONDS = float(
+    os.getenv("HEALTH_CHECK_TIMEOUT_SECONDS", "3")
+)
 
 
 def _fallback_question(category: str, asked_questions: list[str] | None = None) -> str:
@@ -65,11 +68,12 @@ def _clean_question(text: str) -> str:
     return cleaned
 
 def check_ollama() -> str:
+    timeout = min(HEALTH_CHECK_TIMEOUT_SECONDS, max(1.0, LLAMA_TIMEOUT_SECONDS))
     text, _ = call_ollama_with_model_fallback(
         "Reply with one short sentence confirming you are available for interview question generation.",
         temperature=0.0,
         num_predict=20,
-        timeout=max(4, LLAMA_TIMEOUT_SECONDS),
+        timeout=timeout,
     )
     return _clean_question(text.splitlines()[0].strip())
 

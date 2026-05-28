@@ -19,13 +19,36 @@ def _assert_status(name: str, response, expected_status: int = 200) -> None:
 
 def main() -> int:
     os.environ.setdefault("RATE_LIMIT_ENABLED", "false")
+    os.environ.setdefault(
+        "ALLOWED_ORIGINS",
+        "https://ai-interview-simulator-clkdysjhl-riyashekhawat14s-projects.vercel.app,https://ai-interview-simulator-pc8iy5enf-riyashekhawat14s-projects.vercel.app",
+    )
+    os.environ.setdefault("HEALTH_CHECK_TIMEOUT_SECONDS", "3")
 
     app_module = importlib.import_module("backend.main")
     email = f"smoke-{int(time.time())}@example.com"
 
     with TestClient(app_module.app) as client:
         _assert_status("GET /", client.get("/"))
-        _assert_status("GET /health", client.get("/health"))
+
+        health_started = time.monotonic()
+        health = client.get("/health")
+        health_elapsed = time.monotonic() - health_started
+        _assert_status("GET /health", health)
+        if health_elapsed > 8:
+            raise RuntimeError(f"Health check took too long: {health_elapsed:.2f}s")
+
+        preflight = client.options(
+            "/auth/register",
+            headers={
+                "Origin": "https://ai-interview-simulator-clkdysjhl-riyashekhawat14s-projects.vercel.app",
+                "Access-Control-Request-Method": "POST",
+            },
+        )
+        _assert_status("OPTIONS /auth/register", preflight)
+        allowed_origin = preflight.headers.get("access-control-allow-origin")
+        if allowed_origin != "https://ai-interview-simulator-clkdysjhl-riyashekhawat14s-projects.vercel.app":
+            raise RuntimeError(f"Unexpected CORS allow-origin: {allowed_origin}")
 
         register = client.post(
             "/auth/register",
