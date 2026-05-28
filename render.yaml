@@ -3,7 +3,6 @@ services:
     name: ai-interview-frontend
     runtime: static
     rootDir: frontend
-    plan: free
     buildCommand: npm install && npm run build
     staticPublishPath: dist
 
@@ -23,7 +22,6 @@ services:
     name: ai-interview-backend
     env: python
     rootDir: backend
-    plan: free
 
     healthCheckPath: /health
 
