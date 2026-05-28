@@ -46,10 +46,7 @@ services:
         value: "7200"
 
       - key: ALLOWED_ORIGINS
-        fromService:
-          type: web
-          name: ai-interview-frontend
-          envVarKey: RENDER_EXTERNAL_URL
+        value: https://ai-interview-simulator-h0d5pky6h-riyashekhawat14s-projects.vercel.app
 
       - key: RATE_LIMIT_ENABLED
         value: "true"

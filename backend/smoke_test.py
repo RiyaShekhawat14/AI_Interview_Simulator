@@ -21,7 +21,7 @@ def main() -> int:
     os.environ.setdefault("RATE_LIMIT_ENABLED", "false")
     os.environ.setdefault(
         "ALLOWED_ORIGINS",
-        "https://ai-interview-simulator-git-main-riyashekhawat14s-projects.vercel.app,https://ai-interview-simulator-870pz7p46-riyashekhawat14s-projects.vercel.app",
+        "https://ai-interview-simulator-h0d5pky6h-riyashekhawat14s-projects.vercel.app",
     )
     os.environ.setdefault("HEALTH_CHECK_TIMEOUT_SECONDS", "3")
 
@@ -41,13 +41,13 @@ def main() -> int:
         preflight = client.options(
             "/auth/register",
             headers={
-                "Origin": "https://ai-interview-simulator-870pz7p46-riyashekhawat14s-projects.vercel.app",
+                "Origin": "https://ai-interview-simulator-h0d5pky6h-riyashekhawat14s-projects.vercel.app",
                 "Access-Control-Request-Method": "POST",
             },
         )
         _assert_status("OPTIONS /auth/register", preflight)
         allowed_origin = preflight.headers.get("access-control-allow-origin")
-        if allowed_origin != "https://ai-interview-simulator-870pz7p46-riyashekhawat14s-projects.vercel.app":
+        if allowed_origin != "https://ai-interview-simulator-h0d5pky6h-riyashekhawat14s-projects.vercel.app":
             raise RuntimeError(f"Unexpected CORS allow-origin: {allowed_origin}")
 
         register = client.post(
