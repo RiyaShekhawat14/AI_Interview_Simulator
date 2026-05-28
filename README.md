@@ -23,14 +23,6 @@ AI Interview Simulator is a full-stack mock interview platform built to simulate
 
 ## Screenshots
 
-Add your screenshots here after upload.
-
-```md
-![Home Screen](./docs/screenshots/home.png)
-![Interview Setup](./docs/screenshots/setup.png)
-![Interview Flow](./docs/screenshots/interview.png)
-![Final Report](./docs/screenshots/report.png)
-```
 
 ## Tech Stack
 
@@ -213,6 +205,3 @@ npm run backend:smoke
 - Better admin and monitoring workflows
 - Background jobs for heavy AI tasks
 
-## License
-
-Add your preferred license here.
