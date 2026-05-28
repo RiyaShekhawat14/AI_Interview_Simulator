@@ -14,7 +14,10 @@ services:
 
     envVars:
       - key: VITE_API_BASE_URL
-        value: https://ai-interview-backend-wooa.onrender.com
+        fromService:
+          type: web
+          name: ai-interview-backend
+          envVarKey: RENDER_EXTERNAL_URL
 
   - type: web
     name: ai-interview-backend
@@ -46,11 +49,11 @@ services:
       - key: SESSION_TTL_SECONDS
         value: "7200"
 
-      - key: PUBLIC_API_URL
-        value: https://ai-interview-backend-wooa.onrender.com
-
       - key: ALLOWED_ORIGINS
-        value: https://ai-interview-simulator-git-main-riyashekhawat14s-projects.vercel.app,https://ai-interview-simulator-870pz7p46-riyashekhawat14s-projects.vercel.app
+        fromService:
+          type: web
+          name: ai-interview-frontend
+          envVarKey: RENDER_EXTERNAL_URL
 
       - key: RATE_LIMIT_ENABLED
         value: "true"
